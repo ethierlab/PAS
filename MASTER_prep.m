@@ -18,13 +18,12 @@ name_LRparam = TDT_preproc(tdt_struct, rem_baseline_flag, userlower, userupper, 
 agg = [pre1sp, pre2sp, post1sp, post2sp, post3sp];
 
 % Experiments with bilateral data collection, total sessions > 2 should be combined as such
-Lagg = [BL_L1, inter_L2, inter_L3, inter_L4, inter_L5, inter_L6, inter_L7, inter_L8, PostPAS_L9, ProbeL10, ProbeL11, ProbeL12, ProbeL13, ProbeL14];
-Ragg = [BL_R1, inter_R2, inter_R3, inter_R4, inter_R5, inter_R6, inter_R7, inter_R8, PostPAS_R9, ProbeR10, ProbeR11, ProbeR12, ProbeR13, ProbeR14];
+Lagg = [x1x1_Ly1y1, x2x2_Ly2y2, x3x3_Ly3y3];
+Ragg = [x1x1_Ry1y1, x2x2_Ry2y2, x3x3_Ry3y3];
 
 % Experiments with bilateral data collection, total sessions = 2 should be combined as such
 Laggprepost110 = [BL_L110, PostPAS_L110];
 Raggprepost110 = [BL_R110, PostPAS_R110];
-
 
 %% Section 2: Plotting
 

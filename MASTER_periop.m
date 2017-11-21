@@ -16,7 +16,7 @@ load initparams.mat
 [ mat_filenames ] = extractor( save_path );
 cd(save_path);
 num_target_structures = size(mat_filenames, 1);
-A = cell(num_target_structures,1);
+A = cell(num_target_structures,2);
 Lagg = [];
 Ragg = [];
 
@@ -72,10 +72,10 @@ clear tdt_struct;
 % Generate superaggregate and determine absolute maxima and minima
 superaggregate = [Lagg Ragg];
 [ abs_max, abs_min ] = maximizer ( superaggregate );
-
-% Plot Autoscaled EMGs for Response Shape
-disp('Plotting EMGs...')
-EMG_plot ( 1, superaggregate, EMG_vect, 'auto', 'auto', 'auto', 0, 0, 0, 0, 0 );
-
-% Plot Syncscaled EMGs for Absolute Response Amplitude 
-EMG_plot ( 1, superaggregate, EMG_vect, 'auto', 'auto', [abs_min;abs_max], 0, 0, 0, 0, 0 );
+% 
+% % Plot Autoscaled EMGs for Response Shape
+% disp('Plotting EMGs...')
+% EMG_plot ( 1, superaggregate, EMG_vect, 'auto', 'auto', 'auto', 0, 0, 0, 0, 0 );
+% 
+% % Plot Syncscaled EMGs for Absolute Response Amplitude 
+% EMG_plot ( 1, superaggregate, EMG_vect, 'auto', 'auto', [abs_min;abs_max], 0, 0, 0, 0, 0 );

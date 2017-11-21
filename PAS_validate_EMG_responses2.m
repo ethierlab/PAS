@@ -55,8 +55,7 @@ for tr = 1:size(all_evoked_EMGs,1)
 %                 end
 %             end
             trialvect(tr) = true;
-            trialindex = sprintf('trial_%d',tr)
-            selection = selection
+            trialindex = sprintf('trial_%d',tr);
             
             saveas(gcf, [pwd '\supervisedlearning\block_' tdt_struct.info.blockname '_' trialindex '_selection_' selection '_EMG.png']);
             
