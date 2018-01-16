@@ -1,4 +1,4 @@
-function [ abs_max, abs_min ] = maximizer ( superaggregate )
+function [ abs_max, abs_min ] = maximizer ( superaggregate, EMG_vect, desired_sessions )
 % MAXIMIZER This function performs vertical concatenation on left and
 % right side aggregated data and extracts the maximum value in each set of
 % EMG values. 
@@ -22,13 +22,12 @@ num_sess = size(superaggregate,1);
 %     num_chan = num_chan_Lagg;
 % end
 
-for sess = 1:num_sess
-    maxtempmatrix(sess,:) = max(superaggregate(sess).mean_collapsed_EMGs);
-    mintempmatrix(sess,:) = min(superaggregate(sess).mean_collapsed_EMGs);
+for sess = desired_sessions
+    mintempmatrix(sess,:) = min(superaggregate{sess,1}(:,EMG_vect));
+    maxtempmatrix(sess,:) = max(superaggregate{sess,1}(:,EMG_vect));
 end
 
 abs_max = max(maxtempmatrix);
 abs_min = min(mintempmatrix);
 
 end
-

@@ -6,7 +6,7 @@ function [ mat_filenames ] = extractor( savepath )
     %folderpath = uigetdir('','Open folder where .mat files are stored');    
     cd(savepath)
     
-    rawlist = what;
+    rawlist = what(savepath);
     rawlist = rawlist.mat;
     listlength = size(rawlist,1);
     
@@ -18,3 +18,4 @@ function [ mat_filenames ] = extractor( savepath )
     
 end
 
+% fullfile

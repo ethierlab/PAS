@@ -16,6 +16,7 @@
 
 function [ save_path, num_data_files, tdt_struct ] = TDT_import(varargin)
     load_flag = false;
+    
     if nargin
         load_flag = varargin{1};
     end
@@ -31,8 +32,8 @@ function [ save_path, num_data_files, tdt_struct ] = TDT_import(varargin)
     
     save_path = uigetdir('','Where do you want the files to be saved');
     
-    %TODO: find a better way to skip the '.' and '..' directories
-    dir_idx = find([data_dir.isdir]);
+    % TODO: find a better way to skip the '.' and '..' directories
+    dir_idx = find([data_dir.isdir]); 
     dir_idx = dir_idx(3:end);
 
     num_data_files = length(dir_idx);

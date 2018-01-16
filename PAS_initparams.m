@@ -14,7 +14,7 @@ function [ userlower, userupper, EMG_vect, norm, analyzestimdur, analyzeallflag,
     dlg_title = 'Input desired analysis parameters';
     num_lines = 1;
     % Default params
-    defaultans = {'0.1','0.8','1:4','Y','Y','N','5'};
+    defaultans = {'0.1','0.8','1:2','Y','Y','N','5'};
     params = inputdlg(prompt,dlg_title,num_lines,defaultans);
     userlower = str2double(params{1});
     userupper = str2double(params{2});
@@ -29,6 +29,7 @@ function [ userlower, userupper, EMG_vect, norm, analyzestimdur, analyzeallflag,
     elseif strcmpi (norm, 'N') == 1 || strcmpi (norm, 'no') == 1
         norm = false;
     end
+    
     if strcmpi (analyzestimdur, 'Y') == 1 || strcmpi (analyzestimdur, 'yes') == 1
         analyzestimdur = 1;
     elseif strcmpi (analyzestimdur, 'N') == 1 || strcmpi (analyzestimdur, 'no') == 1

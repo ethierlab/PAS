@@ -6,33 +6,41 @@
 % INPUTS: EMG_prevalues_meanSEM, EMG_postvalues_meanSEM, norm
 % OUTPUTS: [Figure: A bar graph]
 
-function PAS_bar ( rem_baseline_flag, EMG_vect, aggregated_data )
+function PAS_bar ( EMG_vect, aggregated_data, varargin )
+    % Where varargin is a comma-delimited vector of desired sessions to
+    % for PAS_bar to plot
+    
     % Initiate figure base
     figure;
     num_sess = length(aggregated_data);
-    num_emgs = aggregated_data(1).num_chan;
+    num_emgs = aggregated_data{1,2}.num_chan;
 
-    %mean_evoked_EMG = nan(num_sess,num_emgs);
-    %sem_evoked_EMG = nan(num_sess,num_emgs);
+    % mean_evoked_EMG = nan(num_sess,num_emgs);
+    % sem_evoked_EMG = nan(num_sess,num_emgs);
     
     for s = 1:num_sess
-        mean_evoked_EMG(s,:) = mean(aggregated_data(s).evoked_collapsed_EMGs(:,EMG_vect));
-        sem_evoked_EMG(s,:)  = 2*std(aggregated_data(s).evoked_collapsed_EMGs(:,EMG_vect))/sqrt(size(aggregated_data(s).evoked_collapsed_EMGs(:,EMG_vect),1));
+        mean_evoked_EMG(s,:) = mean(aggregated_data{s,2}.evoked_collapsed_EMGs(:,EMG_vect));
+        sem_evoked_EMG(s,:)  = 2*std(aggregated_data{s,2}.evoked_collapsed_EMGs(:,EMG_vect))/sqrt(size(aggregated_data{s,2}.evoked_collapsed_EMGs(:,EMG_vect),1));
     end
 
-    barwitherr(sem_evoked_EMG, mean_evoked_EMG);
-    set(gca,'XTickLabel',{aggregated_data.blockname});
+    desired_sessions = cell2mat(varargin);
+    
+    if nargin > 3 
+        barwitherr(sem_evoked_EMG(cell2mat(varargin),:), mean_evoked_EMG(cell2mat(varargin),:));
+    else
+        barwitherr(sem_evoked_EMG, mean_evoked_EMG);
+    end
+    
+    set(gca,'XTicklabel',{char(strrep({aggregated_data{desired_sessions,1}},'_','\_'))});
     
     % write appropriate title overlay depending on what is plotted.
     title(strrep(sprintf(''),'_','\_'));
     
-    if rem_baseline_flag == 1
-        xlabel('Session'); ylabel('Mean (BL removed) Rectified EMG Response, 2SEM) (V)');
-        xtickangle(40)
-    elseif rem_baseline_flag == 0
-        xlabel('Within Day Session'); ylabel('Mean Rectified EMG Response, 2SEM (V)');
-        xtickangle(40)
-    end
+%     if rem_baseline_flag == 1
+%         xlabel('Session'); ylabel('Mean (baseline removed) Rectified EMG Response, 2SEM) (V)');
+%     elseif rem_baseline_flag == 0
+%         xlabel('Within Day Session'); ylabel('Mean Rectified EMG Response, 2SEM (V)');
+%     end
 % 
 %     num_sesh = nargin - 1;
 %     % Generate paired labels. 
@@ -46,9 +54,9 @@ function PAS_bar ( rem_baseline_flag, EMG_vect, aggregated_data )
     % b{1}.FaceColor='w';
     
     % For ACUTE ANALYSIS DIFFERENT BAR COLORS
-%      b = bar(y,'FaceColor','b','LineWidth',0.5);
-%      b(1).FaceColor='b';
-%      b(2).FaceColor='r';
+%       b = bar(y,'FaceColor','b','LineWidth',0.5);
+%       b(1).FaceColor='b';
+%       b(2).FaceColor='r';
     % // ACUTE ANALYSIS DIFFERENT BAR COLORS
 %     
 %     if nargin == 3
@@ -88,21 +96,20 @@ function PAS_bar ( rem_baseline_flag, EMG_vect, aggregated_data )
 %         errorbar((x1(:,1) +  0.335),y(:,6), [2*pre1SEM(1,6), 2*pre2SEM(1,6), 2*post1SEM(1,6), 2*post2SEM(1,6), 2*post3SEM(1,6)]', '.');
 %     end
 
-     
 %     l = cell(1,2);
 %     l{1}='Pre PAS'; l{2}='Post PAS';    
-% %     legend(b,l);
+%     legend(b,l);
 %      
 %     SEMlabel = 'E. bars = +/-2.0 SEM';
 %     dim = [.62 .5 .3 .3];
 %     annotation('textbox',dim,'String',SEMlabel,'FitBoxToText','on');
-%         
+         
     h = legend(string(EMG_vect));
     v = get(h,'title');
     set(v,'string','EMG Channel Number');
-    %savefig(gcf, [aggregated_data(1).blockname 'bar.fig']);
-    %saveas(gcf, [aggregated_data(1).blockname 'bar.svg']);
+    
+ % uncomment to save
+        % savefig(gcf, [aggregated_data(1).blockname 'bar.fig']);
+        % saveas(gcf, [aggregated_data(1).blockname 'bar.svg']);
 
 end
-
- 

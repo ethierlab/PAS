@@ -42,6 +42,15 @@ function processed_data = TDT_preproc ( tdt_struct, auto, rem_baseline_flag, use
     snip_onsets = unique(StS.ts);
     
     num_orig_chan = length(unique(StS.chan));
+    
+    %check if there was any snip and stim onset mismatch
+    if length(stim_epoc.onset)~=length(snip_onsets)
+        error('your data in %s sucks, different number of snips and epoch onsets fix it!',blockname);
+    end
+    if any(stim_epoc.onset-snip_onsets)>1
+        error('timing mismatch (>1sec) between snips and epoch onsets in %s, fix it!',blockname);
+    end
+    
     %check if there was an extra snip recorded at the beginning of the file
     if stim_epoc.onset(1,1)-snip_onsets(1) > 1
         warning('extra snip detected at file onset - removed first snip!');
@@ -56,7 +65,7 @@ function processed_data = TDT_preproc ( tdt_struct, auto, rem_baseline_flag, use
     % initialize variables and counters
     % chan_list     = unique(StS.chan); 
     num_chan      = length(EMG_vect);
-    [num_rows,num_data_pts]  = size(StS.data);  
+    [num_rows, num_data_pts]  = size(StS.data);  
     num_stim       = num_rows/num_orig_chan;
    
     % calculate the required time bin duration by taking 
@@ -72,12 +81,12 @@ function processed_data = TDT_preproc ( tdt_struct, auto, rem_baseline_flag, use
 
     % Take user specified lower and upper bound times and find the column
     % numbers where these are found.
-    stim_onset = find(time_axis>=0,1,'first');
     lowerbound = find(time_axis>=userlower,1,'first');
     upperbound = find(time_axis<=userupper,1,'last');
 
     if analyzestimdur == 1
         analyzetimeframe = stim_onset:find(time_axis<=(tdt_struct.epocs.Stim.offset(1)-tdt_struct.epocs.Stim.onset(1)),1,'last');
+        % analyzetime_idx = time_axis<=
     else
         analyzetimeframe = lowerbound:upperbound;
     end
@@ -85,6 +94,8 @@ function processed_data = TDT_preproc ( tdt_struct, auto, rem_baseline_flag, use
     % establish initial array of logicals for 'valid_stims' and 'valid_UNRECT_stims'  
     valid_stims = true(num_stim,1);
     valid_UNRECT_stims = true(num_stim,1);
+    
+    counter = 1;
     
     for ch = 1:num_chan  
         
@@ -98,7 +109,7 @@ function processed_data = TDT_preproc ( tdt_struct, auto, rem_baseline_flag, use
         all_UNRECT_evoked_EMGs = StS.data(ch_idx,:);
         baseline_UNRECT_mean = mean(all_UNRECT_evoked_EMGs(:,1:stim_onset),2);
         
-        if ch == muscle_of_interest && auto == 0
+        if ch == muscle_of_interest && ~auto
             
             [valid_stims] = PAS_validate_EMG_responses2(all_evoked_EMGs, time_axis, baseline_mean, valid_stims, muscle_of_interest, tdt_struct); 
             
@@ -126,16 +137,19 @@ function processed_data = TDT_preproc ( tdt_struct, auto, rem_baseline_flag, use
             all_UNRECT_evoked_EMGs = rem_baseline(stim_onset,all_UNRECT_evoked_EMGs); 
         end
         
-        % RECORD of UNFILTERED TRIALS DATA
-        uncollapsed_unfiltered_rect_EMGs = all_evoked_EMGs;
-        uncollapsed_unfiltered_UNRECT_EMGs = all_UNRECT_evoked_EMGs;
-
-        % FILTER TRIALS BASED ON VALIDATION
+        if counter % TODO: run for every muscle
+            % RECORD of UNFILTERED TRIALS DATA
+            uncollapsed_unfiltered_rect_EMGs = all_evoked_EMGs;
+            uncollapsed_unfiltered_UNRECT_EMGs = all_UNRECT_evoked_EMGs;
+            counter = 2;
+        end
+        
+        % FILTER TRIALS BASED ON VALIDATION % TODO: change term filtered TO VALIDATED
         uncollapsed_filtered_rect_EMGs   = all_evoked_EMGs(valid_stims,:);
         uncollapsed_filtered_UNRECT_EMGs = all_UNRECT_evoked_EMGs(valid_UNRECT_stims,:);
-
+        
         % COLLAPSE ACROSS TRIALS BY CALCULATING SDs, used to plot error
-        % bars in bar graphs
+        % bars in bar graphs % TODO: removed collapsed/uncollapsed every
         sd_collapsed_rect_EMGs(:,ch)     = std(uncollapsed_filtered_rect_EMGs,0,1)';
         sd_collapsed_UNRECT_EMGs(:,ch)   = std(uncollapsed_filtered_UNRECT_EMGs,0,1)';
 
