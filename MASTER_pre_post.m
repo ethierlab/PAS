@@ -6,7 +6,7 @@ function result_struct = MASTER_pre_post(pre_data, post_data)
 %% Part I: Run Once Every Time there is  New Analysis
 
     % Import TDT Data from User Specified Directory and Place in a TDT Structure
-    %[ save_path, num_data_files, tdt_struct ] = TDT_import(  );
+    %[matdata, num_data_files, save_path] = TDT_import(  );
  
 %% Part II: Run Every Time an Analysis is Needed
 

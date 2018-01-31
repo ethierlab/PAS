@@ -3,7 +3,8 @@
 
 %% Section 1: Data Preparation
 % Import the data
-[ save_path, num_data_files, tdt_struct ] = TDT_import();
+ [matdata, num_data_files, save_path] = TDT_import();
+ tdt_struct = matdata{1};
 
 % Obtain initial parameters from user
 [ userlower, userupper, EMG_vect, rem_baseline_flag, analyzestimdur, analyzeallflag ] = PAS_initparams( );
