@@ -2,7 +2,9 @@ function meanMEPs = calc_mean_MEPs(data_array,varargin)
 % usage: meanMEPs = calc_mean_MEPs(EMGs,timeframe,[params])
 %
 %  This function returns the average EMG response for all data blocks in data_array,
-%       calculated based on the parameters in params
+%       calculated based on the parameters in params.
+%               if rectify -> mean (or median) of response integral in mV*ms
+%               else       -> mean (or median) of peak-to-peak response in mV
 %
 %   inputs:
 %       data_array  :  [nblocks x 2] cell array of data in ELF format (see convertTDT2ELformat.m)
@@ -30,7 +32,8 @@ function meanMEPs = calc_mean_MEPs(data_array,varargin)
 %                   'MEPs'          : mean MEP measures over specified time window
 %                   'sd'            : sd of mean MEPs over specified time window
 %                   'N'             : number of MEPs that were averaged
-%                   'median'        : wether or not the median was used instead of the mean for the calculation
+%                   'median'        : whether or not the median was used instead of the mean for the calculation
+%                   'integral'      : whether or not MEP was integral (if not, p2p)
 
 %%%% Ethierlab 2018/05 -- CE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -67,21 +70,27 @@ for b = 1:num_blocks
         tmp_emg = data_array{b,1}.snips.data(:,data_array{b,1}.snips.chan_list==params.emg_vec(e));
         tmp_emg = vertcat(tmp_emg{:});
         
-        % extract data over time window
-        tmp_emg =  tmp_emg(:,data_array{b,1}.snips.timeframe>=params.window(1)/1000 & data_array{b,1}.snips.timeframe<=params.window(2)/1000);
+        % response and baseline windows
+        resp_idx = data_array{b,1}.snips.timeframe>=params.window(1)/1000 & data_array{b,1}.snips.timeframe<=params.window(2)/1000;
+        base_idx = data_array{b,1}.snips.timeframe < 0;
         
         if params.rectify
-            %calculate mean EMG over time window for each stimulus individually
+            %rectify
             tmp_emg  = abs(tmp_emg);
-            tmp_resp = mean(tmp_emg,2);
+            
+            %remove baseline
+            tmp_emg = tmp_emg - mean(mean(tmp_emg(:,base_idx)));
+            
+            %calc integral during response window for each stimulus individually
+            tmp_resp = sum(tmp_emg(:,resp_idx),2)*1000*(params.window(2)-params.window(1)); % in mV*ms
             tmp_sd   = std(tmp_resp);
         else
             %calculate peak-to-peak value during time window for each stimulus individually
-            tmp_resp = range(tmp_emg,2);
-            tmp_sd   = sd(tmp_resp);
+            tmp_resp = range(tmp_emg(:,resp_idx),2)*1000; %in uV
+            tmp_sd   = std(tmp_resp);
         end
         
-        % calculates mean (or median) of all responses to all stimuli
+        % calculates mean (or median) of responses to all stimuli
         if params.median
             tmp_resp = median(tmp_resp);
         else
@@ -99,4 +108,5 @@ meanMEPs = struct(...
     'MEPs'          ,{mMEP},...
     'sd'            ,{sdMEP},...
     'N'             ,N,...
-    'median'        ,params.median);
+    'median'        ,params.median,...
+    'integral'      ,params.rectify);

@@ -84,10 +84,10 @@ for b = 1:num_blocks
         if params.plot
             %convert to mV
             ah(e) = subplot(nEMGs,1,e);
-            plotShadedSD(ah(e),timeframe,1000*EMGm{b,e},1000*EMGsd{b,e});
+            plotShadedSD(ah(e),timeframe,10^6*EMGm{b,e},10^6*EMGsd{b,e});
             xlabel('Time (s)');
-            ylabel(['mean ' params.mode ' EMG (mV)']);
-            title(sprintf('mean EMG traces for datablock %s',data_array{b,2}));
+            ylabel('mean EMG (uV)');
+            title(strrep(sprintf('mean EMG traces for datablock %s',data_array{b,2}),'_','\_'));
             legend(sprintf('ch %d',chan_list(e)));
         end
     end

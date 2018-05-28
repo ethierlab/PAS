@@ -30,8 +30,8 @@ for e = 1:num_emgs
     figure;
     e_idx = meanMEPs.chan_list==emg_vec(e);
     
-    mMEPs = meanMEPs.MEPs(mep_idx,e_idx)*10^6;
-    seMEPs= meanMEPs.sd(mep_idx,e_idx)./sqrt(meanMEPs.N(mep_idx))*10^6;
+    mMEPs = meanMEPs.MEPs(mep_idx,e_idx);
+    seMEPs= meanMEPs.sd(mep_idx,e_idx)./sqrt(meanMEPs.N(mep_idx));
 
     barwitherr(seMEPs,mMEPs);
     
@@ -44,8 +44,17 @@ for e = 1:num_emgs
     else
         mode = 'mean';
     end
-    ylabel([mode ' MEP (uV)']);
+    if meanMEPs.integral
+        units = '(mV*ms)';
+        leg1  = 'MEP integral';
+    else
+        units = '(mV)';
+        leg1  = 'p2p MEP';
+    end
+    
+    ylabel([mode ' MEP ' units]);
     title(sprintf('Comparing MEPs for ch %d',emg_vec(e)));
+    legend({leg1,'SEM'});
     
 end
 

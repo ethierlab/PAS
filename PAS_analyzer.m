@@ -22,7 +22,7 @@ function varargout = PAS_analyzer(varargin)
 
 % Edit the above text to modify the response to help PAS_analyzer
 
-% Last Modified by GUIDE v2.5 28-May-2018 16:38:56
+% Last Modified by GUIDE v2.5 28-May-2018 18:43:42
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,9 +61,9 @@ handles.pathname    = '';
 handles.filename    = '';
 handles.meanMEPs    = [];
 handles.params = struct(...
-    'emg_vec'       , [],...
+    'emg_vec'       , [1 2],...
     'time_before'   , 100,...
-    'time_after'    , 300,...
+    'time_after'    , 500,...
     'rectify'       , true,...
     'median'        , true,...
     'time_window'   , [0 200]);
@@ -109,13 +109,14 @@ if pathname
     handles.filename = filename;
     handles.pathname = pathname;
     data_tmp           = load(fullfile(handles.pathname,handles.filename));
-    if ~isfield(data_tmp,'data_array')
+    if ~isfield(data_tmp,'matdata')
         warning('Incompatible data file. Data load failed');
         return;
     end
     %load data_array
-    handles.data_array = data_tmp.data_array;
+    handles.data_array = data_tmp.matdata;
     handles.data_table.Data = handles.data_array(:,2:end);
+    handles.data_table.ColumnName = handles.data_table.ColumnName(1);
     %load MEPs if any
     if isfield(data_tmp,'meanMEPs')
         handles.meanMEPs = data_tmp.meanMEPs;
@@ -146,9 +147,9 @@ if pathname
     % user did not press cancel, update file info in handles
     handles.filename = filename;
     handles.pathname = pathname;
-    data_array = handles.data_array;
+    matdata    = handles.data_array;
     meanMEPs   = handles.meanMEPs;
-    save(fullfile(handles.pathname,handles.filename),'data_array','meanMEPs');
+    save(fullfile(handles.pathname,handles.filename),'matdata','meanMEPs');
     fprintf('File %s\n saved successfully\n',fullfile(handles.pathname,handles.filename));
     clear data_array;
     % update handles in guidata
@@ -212,18 +213,18 @@ function validate_snips_button_Callback(hObject, eventdata, handles)
 if length(handles.data_select)>1
     msgbox('Please select only one data block at a time','Wô les moteurs!','warn')
 else
-    if ~isfield(handles.data_array{1,1},'format')
-        data = validate_EMG_snips(handles.data_array{handles.data_select,1},handles.params);
-    elseif strcmpi(handles.data_array{1,1}.format,'ELF')
-        data = validate_EMG_snips_ELF(handles.data_array{handles.data_select,1},handles.params);
+    if isfield(handles.data_array{1,1},'format')
+        if strcmpi(handles.data_array{1,1}.format,'ELF')
+            data = validate_EMG_snips_ELF(handles.data_array{handles.data_select,1},handles.params);
+            handles.data_array{handles.data_select,1} = data;
+            set(handles.data_table,'Data',handles.data_array(:,2));
+            clear data;
+        end
     else
-        warning('Something is weird with your data. Cannot detect TDT or ELF format. Validation failed.');
-        return;
+        warning('Please convert to ELF format first');
     end
-    handles.data_array{handles.data_select,1} = data;
-    set(handles.data_table,'Data',handles.data_array(:,2));
-    clear data;
 end
+
 % update handles in guidata
 guidata(hObject, handles);
 end
@@ -242,19 +243,24 @@ if isfield(handles.data_array{1,1},'format')
         assignin('base','meanMEPs',meanMEPs);
     end
 else
-    disp('Please convert to ELF format first');
+    warning('Please convert to ELF format first');
+    return;
 end
 
 %update data table with MEP values
 handles.data_table.Data = handles.data_table.Data(:,1);
 handles.data_table.ColumnName = handles.data_table.ColumnName(1);
 for i = 1:length(meanMEPs.chan_list)
-    handles.data_table.ColumnName{i+1} = sprintf('MEP ch%d (uV)',meanMEPs.chan_list(i));
+    if meanMEPs.integral
+        handles.data_table.ColumnName{i+1} = sprintf('MEP ch%d (mV*ms)',meanMEPs.chan_list(i));
+    else
+        handles.data_table.ColumnName{i+1} = sprintf('MEP ch%d (mVpp)',meanMEPs.chan_list(i));
+    end
 end
 
 for b = 1:size(handles.data_array,1)
     for c = 1:length(meanMEPs.chan_list)
-        handles.data_table.Data{b,c+1} = meanMEPs.MEPs(b,c)*10^6;
+        handles.data_table.Data{b,c+1} = meanMEPs.MEPs(b,c);
     end
 end
 
@@ -266,10 +272,15 @@ end
 
 %PLOT EMG
 function plot_emg_button_Callback(hObject, eventdata, handles)
+if isempty(handles.data_select)
+    warning('Please select a data set first');
+    return;
+end
+    
 if isfield(handles.data_array{1,1},'format')
     if strcmpi(handles.data_array{1,1}.format,'ELF')
         meanEMGs  = mean_EMG_traces(handles.data_array(handles.data_select,:),...
-                                    handles.params.emg_vec,'mode',params.rectify,...
+                                    handles.params.emg_vec,'rectify',handles.params.rectify,...
                                     'time_range',[-handles.params.time_before handles.params.time_after]/1000);
         assignin('base','meanEMGs',meanEMGs);
         
@@ -448,4 +459,3 @@ handles.params.median = hObject.Value;
 % update handles in guidata
 guidata(hObject, handles);
 end
-
