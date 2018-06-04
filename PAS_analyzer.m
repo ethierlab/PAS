@@ -22,7 +22,7 @@ function varargout = PAS_analyzer(varargin)
 
 % Edit the above text to modify the response to help PAS_analyzer
 
-% Last Modified by GUIDE v2.5 28-May-2018 18:43:42
+% Last Modified by GUIDE v2.5 04-Jun-2018 17:51:05
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -98,6 +98,22 @@ end
 %update handles in guidata
 guidata(hObject, handles);
 end
+
+% --- Executes on button press in import_lc_button.
+function import_lc_button_Callback(hObject, eventdata, handles)
+% hObject    handle to import_lc_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[handles.data_array, num_data_files, handles.pathname] = LC_import('time_before',handles.params.time_before/1000,'time_after',handles.params.time_after/1000);
+if ~isempty(handles.pathname)
+    handles.data_table.Data = handles.data_array(:,2:end);
+else
+    disp('Import cancelled');
+end
+%update handles in guidata
+guidata(hObject, handles);
+end
+
 
 %LOAD
 function load_button_Callback(hObject, eventdata, handles)

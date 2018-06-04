@@ -6,7 +6,7 @@ function [meanEMGs] = mean_EMG_traces(data_array,EMG_vec,varargin)
 %  It returns the average EMG traces for each data structure and plots them all if the "plot_flag" optional argument is true.
 %
 %   inputs:
-%       data_array  :  cell array of data structure, as provided by parse_tdt_data.m
+%       data_array  :  cell array of data structure, as provided by TDT_import or LC_import
 %       EMG_vec     :  vector of EMG channels for which to measure recruitment
 %       params      :  (optional) none, one or many of these can be provided, any missing parameter will be
 %                      set to its default value, indicated in brackets here below.
@@ -39,6 +39,12 @@ params = parse_input_params(params,varargin);
 % EMG variables:
 if isempty(EMG_vec)
     EMG_vec = data_array{1,1}.snips.chan_list;
+end
+
+if ~all(ismember(EMG_vec,data_array{1,1}.snips.chan_list))
+    warning('selected emgs channels are not available');
+    meanEMGs= {};
+    return;
 end
 
 num_blocks    = size(data_array,1);
