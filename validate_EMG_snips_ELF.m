@@ -80,7 +80,9 @@ switch save_data
         data.snips.num_snips = sum(valid_snips);
         data.snips.onsets    = data.snips.onsets(valid_snips,:);
         data.snips.data      = data.snips.data(valid_snips,:);
-        data.snips.sortcode  = data.snips.sortcode(valid_snips,:);
+        if isfield(data.snips,'sortcode')
+            data.snips.sortcode  = data.snips.sortcode(valid_snips,:);
+        end
     case 'Cancel'
         disp('Validation cancelled');
 end
