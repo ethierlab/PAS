@@ -63,6 +63,7 @@ N          = nan(num_blocks,1); %number of snips
 for b = 1:num_blocks
     
     N(b) = data_array{b,1}.snips.num_snips;
+    fs = data_array{b,1}.snips.fs;
     
     for e = 1:num_emgs
   
@@ -82,7 +83,7 @@ for b = 1:num_blocks
             tmp_emg = tmp_emg - mean(mean(tmp_emg(:,base_idx)));
             
             %calc integral during response window for each stimulus individually
-            tmp_resp = sum(tmp_emg(:,resp_idx),2)*1000*(params.window(2)-params.window(1)); % in mV*ms
+            tmp_resp = sum(tmp_emg(:,resp_idx),2)*1000/fs; % in mV*ms
             tmp_sd   = std(tmp_resp);
         else
             %calculate peak-to-peak value during time window for each stimulus individually
