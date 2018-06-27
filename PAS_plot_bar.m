@@ -39,6 +39,8 @@ for e = 1:num_emgs
     title(strrep(sprintf(''),'_','\_'));
     pretty_fig;
     
+    xtickangle(45);
+    
     if meanMEPs.median
         mode = 'median';
     else
