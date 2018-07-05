@@ -35,11 +35,13 @@ for e = 1:num_emgs
 
     barwitherr(seMEPs,mMEPs);
     
+    set(gca, 'XTick', 1:length(mMEPs));
     set(gca,'XTickLabel',strrep(blocknames,'_','\_'));
-    title(strrep(sprintf(''),'_','\_'));
-    pretty_fig;
     
     xtickangle(45);
+    
+    title(strrep(sprintf(''),'_','\_'));
+    pretty_fig;
     
     if meanMEPs.median
         mode = 'median';
