@@ -83,6 +83,11 @@ switch save_data
         if isfield(data.snips,'sortcode')
             data.snips.sortcode  = data.snips.sortcode(valid_snips,:);
         end
+        
+        csvwrite([data.info.blockname '.txt'],valid_snips)
+        msgbox({'Validation Choices Saved in a Text File by Block Name, in:'; pwd; [num2str(data.snips.num_snips) ' Trials Were Kept.']});
+        
+        
     case 'Cancel'
         disp('Validation cancelled');
 end
@@ -97,4 +102,4 @@ end
         stop_now     = true;
         uiresume(gcbf);
     end
-end
+ end
