@@ -27,11 +27,13 @@ function meanMEPs = calc_mean_MEPs(data_array,varargin)
 %
 %   outputs:
 %       meanMEPs = struct(...
-%                   'Blocknames'    : string of block names (file names)
-%                   'chan_list'     : array with emg channel numbers (same as EMG_vec)
-%                   'MEPs'          : mean MEP measures over specified time window
-%                   'mean_BL'       : mean baseline reponse over specified time window, organized per probe and per snip
-%                   'mean_MEP'      : mean MEP response over specified time window, organized per probe and per snip
+%                   'Blocknames'        : string of block names (file names)
+%                   'chan_list'         : array with emg channel numbers (same as EMG_vec)
+%                   'MEPs'              : mean MEP measures over specified time window
+%                   'mean_BL_persnip'   : mean baseline reponse over specified time window, organized per probe and per snip
+%                   'mean_MEP_persnip'  : mean MEP response over specified time window (baseline not removed), organized per probe and per snip
+%                   'median_BL_persnip' : median baseline response over specified time window, organized per probe and per snip 
+%                   'median_MEP_persnip': median MEP response over specified time window (baseline not removed), organized per probe and per snip
 %                   'sd'            : sd of mean MEPs over specified time window
 %                   'N'             : number of MEPs that were averaged
 %                   'median'        : whether or not the median was used instead of the mean for the calculation
