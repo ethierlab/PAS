@@ -84,10 +84,11 @@ switch save_data
             data.snips.sortcode  = data.snips.sortcode(valid_snips,:);
         end
         
-        csvwrite([data.info.blockname '.txt'],valid_snips)
-        msgbox({'Validation Choices Saved in a Text File by Block Name, in:'; pwd; [num2str(data.snips.num_snips) ' Trials Were Kept.']});
-        
-        
+        % automatically save record of validation choices for
+        % cross-reference later and replication of analyses.
+        data.validation_record = {};
+        data.validation_record = [data.validation_record, valid_snips];
+       
     case 'Cancel'
         disp('Validation cancelled');
 end
