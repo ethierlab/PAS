@@ -88,8 +88,8 @@ for b = 1:num_blocks
             mean_MEP_persnip{b,:} = mean(tmp_emg(:,resp_idx), 2);
             
             %calculate median baseline and median MEP (baseline not removed) per snip
-            median_baseline_persnip{b,:} = median{tmp_emg(:,base_idx), 2);
-            median_MEP_persnip{b,:} = median(tmp_EMG(:,resp_idx), 2);
+            median_baseline_persnip{b,:} = median(tmp_emg(:,base_idx), 2);
+            median_MEP_persnip{b,:} = median(tmp_emg(:,resp_idx), 2);
             
             %remove baseline
             tmp_emg = tmp_emg - mean(mean(tmp_emg(:,base_idx)));
