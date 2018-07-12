@@ -93,7 +93,7 @@ for b = 1:num_blocks
 
         %calculate integral of baseline and MEP (baseline not removed) per snip
         integral_baseline_persnip{b,:} = sum(tmp_emg_2(:,base_idx),2)*1000/fs;
-        integral_MEP_persnip{b,:} = sum(tmp_emg_2(:,base_idx),2)*1000/fs;
+        integral_MEP_persnip{b,:} = sum(tmp_emg_2(:,resp_idx),2)*1000/fs;
         
         %export tmp_resp into structure
         p2p_baseline_persnip{b,:} = range(tmp_emg(:,base_idx),2)*1000;
