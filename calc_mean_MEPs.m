@@ -79,17 +79,29 @@ for b = 1:num_blocks
         resp_idx = data_array{b,1}.snips.timeframe>=params.window(1)/1000 & data_array{b,1}.snips.timeframe<=params.window(2)/1000;
         base_idx = data_array{b,1}.snips.timeframe < 0;
         
+        %calculate temporary rectified emg for calculation of baseline and
+        %MEPs per snip 
+        tmp_emg_2  = abs(tmp_emg);
+        
+        %calculate mean baseline and mean MEP (baseline not removed) per snip
+        mean_baseline_persnip{b,:} = mean(tmp_emg_2(:,base_idx), 2);
+        mean_MEP_persnip{b,:} = mean(tmp_emg_2(:,resp_idx), 2);
+
+        %calculate median baseline and median MEP (baseline not removed) per snip
+        median_baseline_persnip{b,:} = median(tmp_emg_2(:,base_idx), 2);
+        median_MEP_persnip{b,:} = median(tmp_emg_2(:,resp_idx), 2);
+
+        %calculate integral of baseline and MEP (baseline not removed) per snip
+        integral_baseline_persnip{b,:} = sum(tmp_emg_2(:,base_idx),2)*1000/fs;
+        integral_MEP_persnip{b,:} = sum(tmp_emg_2(:,base_idx),2)*1000/fs;
+        
+        %export tmp_resp into structure
+        p2p_baseline_persnip{b,:} = range(tmp_emg(:,base_idx),2)*1000;
+        p2p_MEP_persnip{b,:} = range(tmp_emg(:,resp_idx),2)*1000;
+        
         if params.rectify
             %rectify
             tmp_emg  = abs(tmp_emg);
-            
-            %calculate mean baseline and mean MEP (baseline not removed) per snip
-            mean_baseline_persnip{b,:} = mean(tmp_emg(:,base_idx), 2);
-            mean_MEP_persnip{b,:} = mean(tmp_emg(:,resp_idx), 2);
-            
-            %calculate median baseline and median MEP (baseline not removed) per snip
-            median_baseline_persnip{b,:} = median(tmp_emg(:,base_idx), 2);
-            median_MEP_persnip{b,:} = median(tmp_emg(:,resp_idx), 2);
             
             %remove baseline
             tmp_emg = tmp_emg - mean(mean(tmp_emg(:,base_idx)));
@@ -97,10 +109,12 @@ for b = 1:num_blocks
             %calc integral during response window for each stimulus individually
             tmp_resp = sum(tmp_emg(:,resp_idx),2)*1000/fs; % in mV*ms
             tmp_sd   = std(tmp_resp);
-        else
+            
+        else  
             %calculate peak-to-peak value during time window for each stimulus individually
-            tmp_resp = range(tmp_emg(:,resp_idx),2)*1000; %in uV
+            tmp_resp = range(tmp_emg(:,resp_idx),2)*1000; %in mV
             tmp_sd   = std(tmp_resp);
+            
         end
         
         % calculates mean (or median) of responses to all stimuli
@@ -122,6 +136,10 @@ meanMEPs = struct(...
     'mean_MEP_persnip'  ,{mean_MEP_persnip},...
     'median_BL_persnip' ,{median_baseline_persnip},...
     'median_MEP_persnip',{median_MEP_persnip},...
+    'integ_BL_persnip'  ,{integral_baseline_persnip},...
+    'integ_MEP_persnip' ,{integral_MEP_persnip},...   
+    'p2p_BL_persnip'    ,{p2p_baseline_persnip},...
+    'p2p_MEP_persnip'   ,{p2p_MEP_persnip},...
     'MEPs'              ,{mMEP},...
     'sd'                ,{sdMEP},...
     'N'                 ,N,...
