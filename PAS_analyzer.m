@@ -22,7 +22,7 @@ function varargout = PAS_analyzer(varargin)
 
 % Edit the above text to modify the response to help PAS_analyzer
 
-% Last Modified by GUIDE v2.5 04-Jun-2018 17:51:05
+% Last Modified by GUIDE v2.5 18-Jul-2018 15:04:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,14 +59,14 @@ handles.data_array  = {};
 handles.data_select = [];
 handles.pathname    = '';
 handles.filename    = '';
-handles.meanMEPs    = [];
+handles.MEPs        = [];
 handles.params = struct(...
-    'emg_vec'       , [1 2],...
+    'emg_vec'       , [1],...
     'time_before'   , 100,...
     'time_after'    , 500,...
     'rectify'       , true,...
-    'median'        , true,...
-    'time_window'   , [0 200]);
+    'use_p2p'       , true,...
+    'time_window'   , [10 20]);
 
 % Update handles structure
 guidata(hObject, handles);
@@ -134,18 +134,12 @@ if pathname
     handles.data_table.Data = handles.data_array(:,2:end);
     handles.data_table.ColumnName = handles.data_table.ColumnName(1);
     %load MEPs if any
-    if isfield(data_tmp,'meanMEPs')
-        handles.meanMEPs = data_tmp.meanMEPs;
-        assignin('base','meanMEPs',handles.meanMEPs);
+    if isfield(data_tmp,'MEPs')
+        handles.MEPs = data_tmp.MEPs;
+        assignin('base','MEPs',handles.MEPs);
+        
         %update data table with MEP values
-        for i = 1:length(handles.meanMEPs.chan_list)
-            handles.data_table.ColumnName{i+1} = sprintf('MEP ch%d (uV)',handles.meanMEPs.chan_list(i));
-        end
-        for b = 1:size(handles.data_array,1)
-            for c = 1:length(handles.meanMEPs.chan_list)
-                handles.data_table.Data{b,c+1} = handles.meanMEPs.MEPs(b,c)*10^6;
-            end
-        end
+        handles = update_meps(handles);
     end
     clear data_tmp;
     %update handles in guidata
@@ -164,8 +158,8 @@ if pathname
     handles.filename = filename;
     handles.pathname = pathname;
     matdata    = handles.data_array;
-    meanMEPs   = handles.meanMEPs;
-    save(fullfile(handles.pathname,handles.filename),'matdata','meanMEPs');
+    MEPs       = handles.MEPs;
+    save(fullfile(handles.pathname,handles.filename),'matdata','MEPs');
     fprintf('File %s\n saved successfully\n',fullfile(handles.pathname,handles.filename));
     clear data_array;
     % update handles in guidata
@@ -183,7 +177,7 @@ if strcmp(clear_data,'Yes')
     handles.data_select = [];
     handles.pathname    = '';
     handles.filename    = '';
-    handles.meanMEPs    = [];
+    handles.MEPs        = [];
     handles.data_table.Data = [];
     handles.data_table.ColumnName = handles.data_table.ColumnName(1);
 else
@@ -252,38 +246,42 @@ function get_mep_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if isfield(handles.data_array{1,1},'format')
     if strcmpi(handles.data_array{1,1}.format,'ELF')
-        meanMEPs = calc_mean_MEPs(handles.data_array,'rectify',handles.params.rectify,...
-            'median',handles.params.median,...
+        MEPs = calc_mean_MEPs(handles.data_array,...
             'window',handles.params.time_window,...
             'emg_vec',handles.params.emg_vec);
-        assignin('base','meanMEPs',meanMEPs);
+        assignin('base','MEPs',MEPs);
     end
+    handles.MEPs = MEPs;
+    
+    %update data table with MEP values
+    handles = update_meps(handles);
 else
     warning('Please convert to ELF format first');
     return;
 end
 
+% update handles in guidata
+guidata(hObject, handles);
+end
+
+function handles = update_meps(handles)
 %update data table with MEP values
 handles.data_table.Data = handles.data_table.Data(:,1);
 handles.data_table.ColumnName = handles.data_table.ColumnName(1);
-for i = 1:length(meanMEPs.chan_list)
-    if meanMEPs.integral
-        handles.data_table.ColumnName{i+1} = sprintf('MEP ch%d (mV*ms)',meanMEPs.chan_list(i));
-    else
-        handles.data_table.ColumnName{i+1} = sprintf('MEP ch%d (mVpp)',meanMEPs.chan_list(i));
+
+if ~isempty(handles.MEPs)
+    num_ch = length(handles.MEPs.chan_list);
+    for c = 1:num_ch
+        %column label:
+        handles.data_table.ColumnName{c+1}        = sprintf('MEP p2p ch%d (mVpp)',handles.MEPs.chan_list(c));
+        handles.data_table.ColumnName{c+1+num_ch} = sprintf('MEP int ch%d (mV*ms)',handles.MEPs.chan_list(c));
+        %display mean meps for each block
+        for b=1:size(handles.data_array,1)
+            handles.data_table.Data{b,c+1} = handles.MEPs.p2p.mean(b,c);
+            handles.data_table.Data{b,c+1+num_ch} = handles.MEPs.integral.mean(b,c);
+        end
     end
 end
-
-for b = 1:size(handles.data_array,1)
-    for c = 1:length(meanMEPs.chan_list)
-        handles.data_table.Data{b,c+1} = meanMEPs.MEPs(b,c);
-    end
-end
-
-handles.meanMEPs = meanMEPs;
-
-% update handles in guidata
-guidata(hObject, handles);
 end
 
 %PLOT EMG
@@ -316,11 +314,11 @@ if isempty(handles.data_select)
     return;
 end
 
-if isempty(handles.meanMEPs)
+if isempty(handles.MEPs)
     warning('Please calculate MEPs first');
     return;
 end
-PAS_plot_bar(handles.meanMEPs,handles.data_select,handles.params.emg_vec)
+PAS_plot_bar(handles.MEPs,handles.data_select,handles.params.emg_vec,handles.params.use_p2p)
 end
 
 %-------------------------------------------------------------------------------------------------------
@@ -464,14 +462,15 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 end
 
-function mean_radio_Callback(hObject, eventdata, handles)
-handles.params.median = ~hObject.Value;
+function int_radio_Callback(hObject, eventdata, handles)
+handles.params.use_p2p = ~hObject.Value;
 % update handles in guidata
 guidata(hObject, handles);
 end
 
-function median_radio_Callback(hObject, eventdata, handles)
-handles.params.median = hObject.Value;
+function p2p_radio_Callback(hObject, eventdata, handles)
+handles.params.use_p2p = hObject.Value;
 % update handles in guidata
 guidata(hObject, handles);
 end
+
