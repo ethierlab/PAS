@@ -85,7 +85,7 @@ for b = 1:num_blocks
         int_sd(b,e)   = std(int_meps{b,e});
         
         %baseline mean
-        base_mean(b,e) = mean(mean(tmp_emg(:,base_idx)));
+        base_mean(b,e) = mean(mean(tmp_emg(:,base_idx)))*1000; %in mV
 
     end
 end
