@@ -64,13 +64,15 @@ for s = 1:num_snips
     
     %wait until user clicks one of the buttons
     uiwait(gcf);
-    if stop_now
+    if stop_now || ~ishandle(fh)
         break;
     end
 end
 
 % done with validation, save new data
-close(fh);
+if ishandle(fh)
+    close(fh);
+end
 
 save_data = questdlg('Finished. Update data?', ...
     'Confirm changes', ...
