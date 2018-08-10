@@ -22,7 +22,7 @@ function varargout = PAS_analyzer(varargin)
 
 % Edit the above text to modify the response to help PAS_analyzer
 
-% Last Modified by GUIDE v2.5 18-Jul-2018 15:04:57
+% Last Modified by GUIDE v2.5 08-Aug-2018 15:24:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -65,7 +65,7 @@ handles.params = struct(...
     'time_before'   , 100,...
     'time_after'    , 500,...
     'rectify'       , true,...
-    'use_p2p'       , true,...
+    'bar_plot_select', 'int_ave',...
     'time_window'   , [10 20]);
 
 % Update handles structure
@@ -318,7 +318,7 @@ if isempty(handles.MEPs)
     warning('Please calculate MEPs first');
     return;
 end
-PAS_plot_bar(handles.MEPs,handles.data_select,handles.params.emg_vec,handles.params.use_p2p)
+PAS_plot_bar(handles.MEPs,handles.data_select,handles.params.emg_vec,handles.params.bar_plot_select)
 end
 
 %-------------------------------------------------------------------------------------------------------
@@ -328,7 +328,7 @@ function data_table_CellSelectionCallback(hObject, eventdata, handles)
 % eventdata  structure with the following fields (see MATLAB.UI.CONTROL.TABLE)
 %	Indices: row and column indices of the cell(s) currently selecteds
 % handles    structure with handles and user data (see GUIDATA)
-handles.data_select = eventdata.Indices(:,1);
+handles.data_select = unique(eventdata.Indices(:,1));
 guidata(hObject, handles);
 end
 
@@ -463,14 +463,21 @@ end
 end
 
 function int_radio_Callback(hObject, eventdata, handles)
-handles.params.use_p2p = ~hObject.Value;
+handles.params.bar_plot_select = 'integral';
 % update handles in guidata
 guidata(hObject, handles);
 end
 
 function p2p_radio_Callback(hObject, eventdata, handles)
-handles.params.use_p2p = hObject.Value;
+handles.params.bar_plot_select = 'p2p';
 % update handles in guidata
 guidata(hObject, handles);
 end
 
+
+% --- Executes on button press in int_ave_radio.
+function int_ave_radio_Callback(hObject, eventdata, handles)
+handles.params.bar_plot_select = 'int_ave';
+% update handles in guidata
+guidata(hObject, handles);
+end

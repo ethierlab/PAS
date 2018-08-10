@@ -80,12 +80,13 @@ for b = 1:num_blocks
         tmp_emg = vertcat(EMGs{:,e});
         tmp_emg = tmp_emg(:,valid_idx);
         
-        if params.rectify
-            tmp_emg = abs(tmp_emg); %rectify
-        end
-        
+        % average EMG traces
         EMGm{b,e}  = mean(tmp_emg)';
         EMGsd{b,e} =  std(tmp_emg)';
+        
+        if params.rectify
+            EMGm{b,e} = abs(EMGm{b,e}); %rectify
+        end
               
         if params.plot
             %convert to mV

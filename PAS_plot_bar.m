@@ -1,4 +1,4 @@
-function PAS_plot_bar(MEPs,mep_idx,emg_vec,p2p)
+function PAS_plot_bar(MEPs,mep_idx,emg_vec,bar_data_select)
 % usage: PAS_plot_bar(meanMEPs,mep_idx,emg_vec)
 %
 %  This function, meant to be called from PAS_analyzer.m, plots a bar graph of mean MEPs with 2*SEM error bars
@@ -17,7 +17,7 @@ function PAS_plot_bar(MEPs,mep_idx,emg_vec,p2p)
 %
 %      mep_idx       : which blocks to include in bar plot
 %      emg_vec       : which emgs to plot
-%      p2p           : whether to use p2p or integral MEP measures
+%      bar_data_select: {'p2p', 'integral' or 'int_ave'} string to select which MEP measure to use in bar plot
 %
 %
 %%%% Ethierlab 2018/05 -- CE % updated: 2018/07 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,12 +34,17 @@ for e = 1:num_emgs
     figure;
     e_idx = MEPs.chan_list==emg_vec(e);
     
-    if p2p
-        mMEPs   = MEPs.p2p.mean(mep_idx,e_idx);
-        seMEPs = MEPs.p2p.sd(mep_idx,e_idx)./sqrt(MEPs.N(mep_idx));
-    else
-        mMEPs   = MEPs.p2p.mean(mep_idx,e_idx);
-        seMEPs = MEPs.p2p.sd(mep_idx,e_idx)./sqrt(MEPs.N(mep_idx));
+    switch bar_data_select
+        case 'p2p'
+            mMEPs   = MEPs.p2p.mean(mep_idx,e_idx);
+            seMEPs = MEPs.p2p.sd(mep_idx,e_idx)./sqrt(MEPs.N(mep_idx));
+        case 'integral'
+            
+            mMEPs   = MEPs.integral.mean(mep_idx,e_idx);
+            seMEPs = MEPs.integral.sd(mep_idx,e_idx)./sqrt(MEPs.N(mep_idx));
+        case 'int_ave'
+            mMEPs = MEPs.integral_ave(mep_idx,e_idx);
+            seMEPs = zeros(size(mMEPs));
     end
     
     barwitherr(seMEPs,mMEPs);
@@ -47,19 +52,23 @@ for e = 1:num_emgs
     set(gca,'XTick', 1:length(mMEPs));
     set(gca,'XTickLabel',strrep(blocknames,'_','\_'));
     set(gca,'XTickLabelRotation',45);
-
+    
     pretty_fig;
     
-    if p2p
-        units = '(mV*ms)';
-        leg1  = 'MEP integral';
-    else
-        units = '(mV)';
-        leg1  = 'p2p MEP';
+    switch bar_data_select
+        case 'p2p'
+            units = '(mV)';
+            leg1  = 'p2p MEP';
+        case 'integral'
+            units = '(mV*ms)';
+            leg1  = 'MEP Integral';
+        case 'int_ave'
+            units = '(mV*ms)';
+            leg1  = 'ave MEP Integral';
     end
-
-    ylabel([' mean MEPs' units]);
-    title(strrep(sprintf('Comparing MEPs for ch %d',emg_vec(e)),'_','\_'));
+    
+    ylabel([' Mean MEPs' units]);
+    title(strrep(sprintf('MEPs for Ch %d',emg_vec(e)),'_','\_'));
     legend({leg1,'SEM'});
     
 end

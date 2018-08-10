@@ -25,6 +25,7 @@ function MEPs = calc_mean_MEPs(data_array,varargin)
 %                   'int'           : structure containing individual measures of integral of EMG over time window
 %                   'base_mean'     : mean of the rectified EMG prior to stimulation
 %                   'N'             : number of MEPs that were averaged
+%                   'int_ave_mep'   : integral of averaged, then rectified meps
 
 %%%% Ethierlab -- CE %% updated: 2018/07 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -52,6 +53,7 @@ int_mean   = nan(num_blocks,num_emgs);
 int_sd     = nan(num_blocks,num_emgs);
 base_mean  = nan(num_blocks,num_emgs);
 N          = nan(num_blocks,1); %number of snips
+int_ave_mep= nan(num_blocks,1); %integral of averaged, rectified meps
 
 for b = 1:num_blocks
     
@@ -66,23 +68,29 @@ for b = 1:num_blocks
         
         % response and baseline windows
         resp_idx = data_array{b,1}.snips.timeframe>=params.window(1)/1000 & data_array{b,1}.snips.timeframe<=params.window(2)/1000;
-        base_idx = data_array{b,1}.snips.timeframe < 0;
+        base_idx = data_array{b,1}.snips.timeframe < 0;       
 
         % peak-to-peak MEPs
         p2p_meps{b,e} = range(tmp_emg(:,resp_idx),2)*1000; %also convert to mV
         p2p_mean(b,e) = mean(p2p_meps{b,e});
         p2p_sd(b,e)   = std(p2p_meps{b,e});
-
+      
         % rectify
         tmp_emg = abs(tmp_emg);
         
  %             %remove baseline
 %             tmp_emg = tmp_emg - mean(mean(tmp_emg(:,base_idx)));
 
-        % integral of rectified MEPs (baseline emg not removed)
+        % integral of rectified average MEPs (baseline emg not removed)
         int_meps{b,e} = sum(tmp_emg(:,resp_idx),2)*10^6/fs; % also convert to mV*ms
         int_mean(b,e) = mean(int_meps{b,e});
         int_sd(b,e)   = std(int_meps{b,e});
+        
+                
+        % calculate mean of all traces for that probe
+        tmp_emg = mean(tmp_emg,1);
+        
+        int_ave_mep(b,e) = sum(tmp_emg(:,resp_idx),2)*10^6/fs; % integral in mV*ms
         
         %baseline mean
         base_mean(b,e) = mean(mean(tmp_emg(:,base_idx)))*1000; %in mV
@@ -95,5 +103,6 @@ MEPs = struct(...
     'chan_list'         ,params.emg_vec,...
     'p2p'               ,struct('meps',{p2p_meps},'mean',p2p_mean,'sd',p2p_sd),...
     'integral'          ,struct('meps',{int_meps},'mean',int_mean,'sd',int_sd),...
+    'integral_ave'      ,int_ave_mep,...
     'base_mean'         ,base_mean,...
     'N'                 ,N);
