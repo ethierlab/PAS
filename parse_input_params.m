@@ -9,7 +9,7 @@ end
 
 if isstruct(input_params{1})
     % input is a param structure, not a series of {'param name', param value} pairs
-    inpNames = fieldnames(input_params{1});
+    inpNames = lower(fieldnames(input_params{1}));
     for i=1:numel(inpNames)
         if any(strcmpi(inpNames(i),param_names))
             params.(inpNames{i}) = input_params{1}.(inpNames{i});
@@ -31,7 +31,6 @@ else
             % Also, if you find out that there is an option you keep getting wrong,
             % you can use "if strcmp(inpName,'problemOption'),testMore,end"-statements
             params.(inpName) = pair{2};
-            
         else
             error('%s is not a valid parameter name',inpName);
         end
