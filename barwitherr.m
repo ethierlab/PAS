@@ -50,7 +50,7 @@
 %
 %**************************************************************************
 
-function barwitherr(errors,varargin)
+function handles = barwitherr(errors,varargin)
 
 % Check how the function has been called based on requirements for "bar"
 if nargin < 3
@@ -59,7 +59,7 @@ if nargin < 3
     xOrder = 1:size(values,1);
 else
     % This means extra parameters have been specified
-    if isscalar(varargin{2}) || ischar(varargin{2})
+    if ishandle(varargin{2}) || ischar(varargin{2})
         % It is a width / property so the y values are still varargin{1}
         values = varargin{1};
         xOrder = 1:size(values,1);
