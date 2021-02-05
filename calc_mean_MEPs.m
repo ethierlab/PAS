@@ -75,11 +75,11 @@ for b = 1:num_blocks
         p2p_mean(b,e) = mean(p2p_meps{b,e});
         p2p_sd(b,e)   = std(p2p_meps{b,e});
       
-        % rectify
-        tmp_emg = abs(tmp_emg);
-        
- %             %remove baseline
-%             tmp_emg = tmp_emg - mean(mean(tmp_emg(:,base_idx)));
+%        % rectify 
+%        tmp_emg = abs(tmp_emg);
+
+        % rectify and filter EMG
+        tmp_emg = EMGs_rect_filt(tmp_emg',fs)';
 
         % integral of rectified average MEPs (baseline emg not removed)
         int_meps{b,e} = sum(tmp_emg(:,resp_idx),2)*10^6/fs; % also convert to mV*ms

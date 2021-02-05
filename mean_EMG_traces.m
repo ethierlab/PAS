@@ -53,6 +53,7 @@ EMGm          = cell(num_blocks,nEMGs);
 EMGsd         = cell(num_blocks,nEMGs);
 N             = nan(num_blocks,1); %number of snips
 chan_list     = data_array{1,1}.snips.chan_list(EMG_vec);
+fs            = data_array{1,1}.snips.fs;
 
 % timeframe variables:
 timeframe = data_array{1,1}.snips.timeframe;
@@ -80,13 +81,18 @@ for b = 1:num_blocks
         tmp_emg = vertcat(EMGs{:,e});
         tmp_emg = tmp_emg(:,valid_idx);
         
+        if params.rectify
+%             tmp_emg = abs(tmp_emg);
+             tmp_emg = EMGs_rect_filt(tmp_emg',fs)';
+        end
+        
         % average EMG traces
         EMGm{b,e}  = mean(tmp_emg)';
         EMGsd{b,e} =  std(tmp_emg)';
         
-        if params.rectify
-            EMGm{b,e} = abs(EMGm{b,e}); %rectify
-        end
+%         if params.rectify
+%             EMGm{b,e} = abs(EMGm{b,e}); %rectify
+%         end
               
         if params.plot
             %convert to mV
