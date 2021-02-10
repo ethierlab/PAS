@@ -80,29 +80,27 @@ for b = 1:num_blocks
         p2p_mean(b,e) = mean(p2p_meps{b,e});
         p2p_sd(b,e)   = std(p2p_meps{b,e});
       
-<<<<<<< Updated upstream
+
 %        % rectify 
 %        tmp_emg = abs(tmp_emg);
 
         % rectify and filter EMG
         tmp_emg = EMGs_rect_filt(tmp_emg',fs)';
-=======
+
         % rectify
         tmp_emg = abs(tmp_emg);
         
 %              %remove baseline
 %             tmp_emg = tmp_emg - mean(mean(tmp_emg(:,base_idx)));
->>>>>>> Stashed changes
+
 
         % integral of rectified average MEPs (baseline emg not removed)
         int_meps{b,e} = sum(tmp_emg(:,resp_idx),2)*1000/fs; % also convert to mV*ms
         int_mean(b,e) = mean(int_meps{b,e});
         int_sd(b,e)   = std(int_meps{b,e});
         
-                
         % calculate mean of all traces for that probe
         tmp_emg = mean(tmp_emg,1);
-        
         int_ave_mep(b,e) = sum(tmp_emg(:,resp_idx),2)*1000/fs; % integral in mV*ms
         
         %baseline mean

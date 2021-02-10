@@ -39,7 +39,6 @@ for e = 1:num_emgs
             mMEPs   = MEPs.p2p.mean(mep_idx,e_idx);
             seMEPs = MEPs.p2p.sd(mep_idx,e_idx)./sqrt(MEPs.N(mep_idx));
         case 'integral'
-            
             mMEPs   = MEPs.integral.mean(mep_idx,e_idx);
             seMEPs = MEPs.integral.sd(mep_idx,e_idx)./sqrt(MEPs.N(mep_idx));
         case 'int_ave'

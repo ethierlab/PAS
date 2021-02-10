@@ -1,35 +1,35 @@
-function varargout = PAS_analyzer(varargin)
-% PAS_ANALYZER MATLAB code for PAS_analyzer.fig
-%      PAS_ANALYZER, by itself, creates a new PAS_ANALYZER or raises the existing
+function varargout = PAS_analyzer_gui_export(varargin)
+% PAS_ANALYZER_GUI_EXPORT MATLAB code for PAS_analyzer_gui_export.fig
+%      PAS_ANALYZER_GUI_EXPORT, by itself, creates a new PAS_ANALYZER_GUI_EXPORT or raises the existing
 %      singleton*.
 %
-%      H = PAS_ANALYZER returns the handle to a new PAS_ANALYZER or the handle to
+%      H = PAS_ANALYZER_GUI_EXPORT returns the handle to a new PAS_ANALYZER_GUI_EXPORT or the handle to
 %      the existing singleton*.
 %
-%      PAS_ANALYZER('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in PAS_ANALYZER.M with the given input arguments.
+%      PAS_ANALYZER_GUI_EXPORT('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in PAS_ANALYZER_GUI_EXPORT.M with the given input arguments.
 %
-%      PAS_ANALYZER('Property','Value',...) creates a new PAS_ANALYZER or raises the
+%      PAS_ANALYZER_GUI_EXPORT('Property','Value',...) creates a new PAS_ANALYZER_GUI_EXPORT or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before PAS_analyzer_OpeningFcn gets called.  An
+%      applied to the GUI before PAS_analyzer_gui_export_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to PAS_analyzer_OpeningFcn via varargin.
+%      stop.  All inputs are passed to PAS_analyzer_gui_export_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help PAS_analyzer
+% Edit the above text to modify the response to help PAS_analyzer_gui_export
 
-% Last Modified by GUIDE v2.5 10-Feb-2021 14:58:12
+% Last Modified by GUIDE v2.5 10-Feb-2021 16:11:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @PAS_analyzer_OpeningFcn, ...
-                   'gui_OutputFcn',  @PAS_analyzer_OutputFcn, ...
+                   'gui_OpeningFcn', @PAS_analyzer_gui_export_OpeningFcn, ...
+                   'gui_OutputFcn',  @PAS_analyzer_gui_export_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,15 +44,15 @@ end
 end
 % End initialization code - DO NOT EDIT
 
-% --- Executes just before PAS_analyzer is made visible.
-function PAS_analyzer_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before PAS_analyzer_gui_export is made visible.
+function PAS_analyzer_gui_export_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to PAS_analyzer (see VARARGIN)
+% varargin   command line arguments to PAS_analyzer_gui_export (see VARARGIN)
 
-% Choose default command line output for PAS_analyzer
+% Choose default command line output for PAS_analyzer_gui_export
 handles.output = hObject;
 
 handles.data_array  = {};
@@ -72,11 +72,11 @@ handles.params = struct(...
 % Update handles structure
 guidata(hObject, handles);
 end
-% UIWAIT makes PAS_analyzer wait for user response (see UIRESUME)
+% UIWAIT makes PAS_analyzer_gui_export wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 % --- Outputs from this function are returned to the command line.
-function varargout = PAS_analyzer_OutputFcn(hObject, eventdata, handles) 
+function varargout = PAS_analyzer_gui_export_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
