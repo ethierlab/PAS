@@ -7,7 +7,7 @@ function [meanEMGs] = mean_EMG_traces(data_array,EMG_vec,varargin)
 %
 %   inputs:
 %       data_array  :  cell array of data structure, as provided by TDT_import or LC_import
-%       EMG_vec     :  vector of EMG channels for which to measure recruitment
+%       EMG_vec     :  vector of EMG channels to plot
 %       params      :  (optional) none, one or many of these can be provided, any missing parameter will be
 %                      set to its default value, indicated in brackets here below.
 %                      Use either the ('param_name',param_value) pairs or a params structure with 'param_name' fields
@@ -15,6 +15,7 @@ function [meanEMGs] = mean_EMG_traces(data_array,EMG_vec,varargin)
 %           'plot'      :  [true], whether or not to produce one figure of all mean EMG traces for each data structure
 %           'rectify'   :  [true], flag to indicate whether or not to rectify the data
 %           'time_range':  [] empty to use all available data, or 2 element vector specifing desired [time_min time_max]
+%           'amp_gain'  :  [1] scales data inversely proportionnaly to amp_gain
 %
 %   outputs:
 %       meanEMGs = struct(...
@@ -32,7 +33,8 @@ function [meanEMGs] = mean_EMG_traces(data_array,EMG_vec,varargin)
 params = struct(...
     'rectify'         ,'false', ...
     'plot'         , true,...
-    'time_range'   ,[]);
+    'time_range'   ,[],...
+    'amp_gain'     ,1);
 
 params = parse_input_params(params,varargin);
 
@@ -41,7 +43,8 @@ if isempty(EMG_vec)
     EMG_vec = data_array{1,1}.snips.chan_list;
 end
 
-if ~all(ismember(EMG_vec,data_array{1,1}.snips.chan_list))
+if max(EMG_vec)>length(data_array{1,1}.snips.chan_list)
+%if ~all(ismember(EMG_vec,data_array{1,1}.snips.chan_list))
     warning('selected emgs channels are not available');
     meanEMGs= {};
     return;
@@ -80,6 +83,9 @@ for b = 1:num_blocks
         
         tmp_emg = vertcat(EMGs{:,e});
         tmp_emg = tmp_emg(:,valid_idx);
+        %convert to uV
+        tmp_emg = tmp_emg.*10^6/params.amp_gain;
+        
         
         if params.rectify
 %             tmp_emg = abs(tmp_emg);
@@ -95,17 +101,19 @@ for b = 1:num_blocks
 %         end
               
         if params.plot
-            %convert to mV
             ah(e) = subplot(nEMGs,1,e);
-            plotShadedSD(ah(e),timeframe,10^6*EMGm{b,e},10^6*EMGsd{b,e});
+            plotShadedSD(ah(e),timeframe,EMGm{b,e},EMGsd{b,e});
+            hold on;
+            % add envelope based on local maxima spline interpolation of N = 800 samples.  
+            plot(timeframe,envelope(EMGm{b,e},800,'peak'));
             xlabel('Time (s)');
-            ylabel('mean EMG (uV)');
-            title(strrep(sprintf('mean EMG traces for datablock %s',data_array{b,2}),'_','\_'));
+            ylabel('Mean EMG (uV)');
+            title(strrep(sprintf('Mean EMG Traces for Datablock %s',data_array{b,2}),'_','\_'));
             legend(sprintf('ch %d',chan_list(e)));
         end
     end
     if params.plot
-        linkaxes(ah,'xy');
+%         linkaxes(ah,'xy');
     end
 end
 
@@ -114,5 +122,6 @@ meanEMGs = struct(...
     'chan_list'     ,chan_list,...
     'EMGmean'       ,{EMGm},...
     'EMGsd'         ,{EMGsd},...
+    'amp_gain'      ,params.amp_gain,...
     'N'             ,N);
 

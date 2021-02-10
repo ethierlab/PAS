@@ -22,7 +22,7 @@ function varargout = PAS_analyzer(varargin)
 
 % Edit the above text to modify the response to help PAS_analyzer
 
-% Last Modified by GUIDE v2.5 08-Aug-2018 15:24:21
+% Last Modified by GUIDE v2.5 05-Mar-2020 13:15:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -64,6 +64,7 @@ handles.params = struct(...
     'emg_vec'       , [1],...
     'time_before'   , 100,...
     'time_after'    , 500,...
+    'amp_gain'      , 1,...
     'rectify'       , true,...
     'bar_plot_select', 'int_ave',...
     'time_window'   , [10 20]);
@@ -114,7 +115,6 @@ end
 guidata(hObject, handles);
 end
 
-
 %LOAD
 function load_button_Callback(hObject, eventdata, handles)
 % load matlab file from folder:
@@ -159,8 +159,12 @@ if pathname
     handles.pathname = pathname;
     matdata    = handles.data_array;
     MEPs       = handles.MEPs;
-    save(fullfile(handles.pathname,handles.filename),'matdata','MEPs');
-    fprintf('File %s\n saved successfully\n',fullfile(handles.pathname,handles.filename));
+    rat_name = get(handles.edit6, 'String');
+    session_date = handles.session_date;
+    STDP_condition = handles.STDP_condition;
+    window = handles.params.time_window;
+    save(fullfile(handles.pathname,handles.filename),'matdata','MEPs','rat_name','session_date','STDP_condition','window');
+    fprintf('File %s\n saved successfully. Open quickload.mat to see measurement time window.\n',fullfile(handles.pathname,handles.filename));
     clear data_array;
     % update handles in guidata
     guidata(hObject, handles);
@@ -178,6 +182,7 @@ if strcmp(clear_data,'Yes')
     handles.pathname    = '';
     handles.filename    = '';
     handles.MEPs        = [];
+    set ([handles.edit6, handles.edit7, handles.edit8], 'String','');
     handles.data_table.Data = [];
     handles.data_table.ColumnName = handles.data_table.ColumnName(1);
 else
@@ -195,6 +200,9 @@ function load_ws_button_Callback(hObject, eventdata, handles)
 for i = 1:length(handles.data_select)
     assignin('base',handles.data_array{handles.data_select(i),2},handles.data_array{handles.data_select(i),1});
 end
+assignin('base','rat_name',get(handles.edit6, 'String'));
+assignin('base','session_date',get(handles.edit7, 'String'));
+assignin('base','exp_condition',get(handles.edit8, 'String'));
 end
 
 %CONV2ELF
@@ -248,7 +256,8 @@ if isfield(handles.data_array{1,1},'format')
     if strcmpi(handles.data_array{1,1}.format,'ELF')
         MEPs = calc_mean_MEPs(handles.data_array,...
             'window',handles.params.time_window,...
-            'emg_vec',handles.params.emg_vec);
+            'emg_vec',handles.params.emg_vec,...
+            'amp_gain',handles.params.amp_gain);
         assignin('base','MEPs',MEPs);
     end
     handles.MEPs = MEPs;
@@ -295,7 +304,8 @@ if isfield(handles.data_array{1,1},'format')
     if strcmpi(handles.data_array{1,1}.format,'ELF')
         meanEMGs  = mean_EMG_traces(handles.data_array(handles.data_select,:),...
                                     handles.params.emg_vec,'rectify',handles.params.rectify,...
-                                    'time_range',[-handles.params.time_before handles.params.time_after]/1000);
+                                    'time_range',[-handles.params.time_before handles.params.time_after]/1000,...
+                                    'amp_gain', handles.params.amp_gain);
         assignin('base','meanEMGs',meanEMGs);
         
     end
@@ -408,7 +418,16 @@ guidata(hObject, handles);
 end
 
 function time_after_edit_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to time_after_edit (see GCBO)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
+
+% GAIN
+% --- Executes during object creation, after setting all properties.
+function amp_gain_edit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to amp_gain_edit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -417,6 +436,11 @@ function time_after_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+end
+
+function amp_gain_edit_Callback(hObject, eventdata, handles)
+handles.params.amp_gain = str2double(hObject.String);
+guidata(hObject, handles);
 end
 
 %RECTIFY
@@ -481,3 +505,76 @@ handles.params.bar_plot_select = 'int_ave';
 % update handles in guidata
 guidata(hObject, handles);
 end
+
+
+function edit6_Callback(hObject, eventdata, handles)
+% hObject    handle to edit6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    handles.rat_name = get(hObject, 'String');
+% Hints: get(hObject,'String') returns contents of edit6 as text
+%        str2double(get(hObject,'String')) returns contents of edit6 as a double
+    guidata(hObject, handles);
+end
+
+% --- Executes during object creation, after setting all properties.
+function edit6_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
+
+
+function edit7_Callback(hObject, eventdata, handles)
+% hObject    handle to edit7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    handles.session_date = get(hObject, 'String');
+% Hints: get(hObject,'String') returns contents of edit7 as text
+%        str2double(get(hObject,'String')) returns contents of edit7 as a double
+    guidata(hObject, handles);
+end
+
+% --- Executes during object creation, after setting all properties.
+function edit7_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
+
+
+function edit8_Callback(hObject, eventdata, handles)
+% hObject    handle to edit8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    handles.STDP_condition = get(hObject, 'String');
+% Hints: get(hObject,'String') returns contents of edit8 as text
+%        str2double(get(hObject,'String')) returns contents of edit8 as a double
+    guidata(hObject, handles);
+end
+
+% --- Executes during object creation, after setting all properties.
+function edit8_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
+

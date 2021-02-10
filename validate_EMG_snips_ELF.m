@@ -28,6 +28,7 @@ num_chan    = length(chan_list);
 num_snips   = data.snips.num_snips;
 valid_snips = true(1,data.snips.num_snips);
 stop_now    = false;
+isartifact = 0;
 
 %relevant time index
 if ~isempty(params.time_before)
@@ -38,13 +39,15 @@ end
 
 fh = figure; set(gcf,'Units','normalized','Position',[.2 .2 .6 .6]);
 
-keep_button = uicontrol('Parent',fh,'Style','pushbutton','String','KEEP',...
-    'Units','normalized','Position',[.22 .02 .08 .06],'ForegroundColor','g','Callback',@(src,evnt)valid_cbk(true));
-reject_button = uicontrol('Parent',fh,'Style','pushbutton','String','REJECT',...
-    'Units','normalized','Position',[.47 .02 .08 .06],'ForegroundColor','r','Callback',@(src,evnt)valid_cbk(false));
+keep_button = uicontrol('Parent',fh,'Style','pushbutton','String','MEP +',...
+    'Units','normalized','Position',[.27 .02 .08 .06],'ForegroundColor','g','Callback',@(src,evnt)valid_cbk(true,0));
+reject_button = uicontrol('Parent',fh,'Style','pushbutton','String','MEP -',...
+    'Units','normalized','Position',[.37 .02 .08 .06],'ForegroundColor','r','Callback',@(src,evnt)valid_cbk(false,0));
 close_button = uicontrol('Parent',fh,'Style','pushbutton','String','CLOSE',...
-    'Units','normalized','Position',[.72 .02 .08 .06],'Callback',@(src,evnt)close_cbk);
-
+    'Units','normalized','Position',[.47 .02 .08 .06],'Callback',@(src,evnt)close_cbk);
+artifact_button = uicontrol('Parent',fh,'Style','pushbutton','String','ARTIFACT',...
+    'Units','normalized','Position',[.57 .02 .08 .06],'ForegroundColor','b','Callback',@(src,evnt)valid_cbk(false,1));
+    
 
 for s = 1:num_snips
     % for each snip...
@@ -90,14 +93,21 @@ switch save_data
         % cross-reference later and replication of analyses.
         data.validation_record = {};
         data.validation_record = [data.validation_record, valid_snips];
+        
+        data.artifact_record = isartifact;
        
     case 'Cancel'
         disp('Validation cancelled');
 end
 
+% prompt = {'Enter animal name:','Enter Session Date','Enter STDP Condition'};
+% dlgtitle = 'Metadata';
+% metadata = inputdlg(prompt,dlgtitle);
+% data.metadata = metadata;
 
-    function valid_cbk(isvalid)
+    function valid_cbk(isvalid,newartifact)
         valid_snips(s) = isvalid;
+        isartifact = isartifact+newartifact;
         uiresume(gcbf);
     end
 
