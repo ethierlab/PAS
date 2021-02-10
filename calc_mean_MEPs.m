@@ -16,6 +16,7 @@ function MEPs = calc_mean_MEPs(data_array,varargin)
 %           'emg_vec'      :  [] vector of emg channels to include. leave empty to include all.
 %
 %           'window'       :  [0 20] two-element vector to delimit the EMG response analysis time window (in milliseconds)
+%           'amp_gain'     :  [1] scales the MEP values inversely proportionaly to amp_gain
 %
 %   outputs:
 %       MEPs = struct(...
@@ -34,7 +35,8 @@ function MEPs = calc_mean_MEPs(data_array,varargin)
 % defaults parameters
 params = struct( ...
     'emg_vec'      ,[], ...
-    'window'       ,[0 20]);
+    'window'       ,[0 20],...
+    'amp_gain'     , 1);
 
 params = parse_input_params(params,varargin);
 
@@ -66,23 +68,34 @@ for b = 1:num_blocks
         tmp_emg = data_array{b,1}.snips.data(:,data_array{b,1}.snips.chan_list==params.emg_vec(e));
         tmp_emg = vertcat(tmp_emg{:});
         
+        %convert to mV
+        tmp_emg = tmp_emg.*1000/params.amp_gain;
+        
         % response and baseline windows
         resp_idx = data_array{b,1}.snips.timeframe>=params.window(1)/1000 & data_array{b,1}.snips.timeframe<=params.window(2)/1000;
         base_idx = data_array{b,1}.snips.timeframe < 0;       
 
         % peak-to-peak MEPs
-        p2p_meps{b,e} = range(tmp_emg(:,resp_idx),2)*1000; %also convert to mV
+        p2p_meps{b,e} = range(tmp_emg(:,resp_idx),2); 
         p2p_mean(b,e) = mean(p2p_meps{b,e});
         p2p_sd(b,e)   = std(p2p_meps{b,e});
       
+<<<<<<< Updated upstream
 %        % rectify 
 %        tmp_emg = abs(tmp_emg);
 
         % rectify and filter EMG
         tmp_emg = EMGs_rect_filt(tmp_emg',fs)';
+=======
+        % rectify
+        tmp_emg = abs(tmp_emg);
+        
+%              %remove baseline
+%             tmp_emg = tmp_emg - mean(mean(tmp_emg(:,base_idx)));
+>>>>>>> Stashed changes
 
         % integral of rectified average MEPs (baseline emg not removed)
-        int_meps{b,e} = sum(tmp_emg(:,resp_idx),2)*10^6/fs; % also convert to mV*ms
+        int_meps{b,e} = sum(tmp_emg(:,resp_idx),2)*1000/fs; % also convert to mV*ms
         int_mean(b,e) = mean(int_meps{b,e});
         int_sd(b,e)   = std(int_meps{b,e});
         
@@ -90,10 +103,10 @@ for b = 1:num_blocks
         % calculate mean of all traces for that probe
         tmp_emg = mean(tmp_emg,1);
         
-        int_ave_mep(b,e) = sum(tmp_emg(:,resp_idx),2)*10^6/fs; % integral in mV*ms
+        int_ave_mep(b,e) = sum(tmp_emg(:,resp_idx),2)*1000/fs; % integral in mV*ms
         
         %baseline mean
-        base_mean(b,e) = mean(mean(tmp_emg(:,base_idx)))*1000; %in mV
+        base_mean(b,e) = mean(mean(tmp_emg(:,base_idx))); 
 
     end
 end
@@ -105,4 +118,6 @@ MEPs = struct(...
     'integral'          ,struct('meps',{int_meps},'mean',int_mean,'sd',int_sd),...
     'integral_ave'      ,int_ave_mep,...
     'base_mean'         ,base_mean,...
+    'amp_gain'          ,params.amp_gain,...
+    'MEPs_window'   ,params.window,...
     'N'                 ,N);
