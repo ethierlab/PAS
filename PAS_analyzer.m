@@ -22,7 +22,7 @@ function varargout = PAS_analyzer(varargin)
 
 % Edit the above text to modify the response to help PAS_analyzer
 
-% Last Modified by GUIDE v2.5 10-Feb-2021 14:58:12
+% Last Modified by GUIDE v2.5 13-Feb-2021 12:15:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -65,7 +65,8 @@ handles.params = struct(...
     'time_before'   , 100,...
     'time_after'    , 500,...
     'amp_gain'      , 1,...
-    'rectify'       , true,...
+    'rectify'       , false,...
+    'dc'            , true,...
     'bar_plot_select', 'int_ave',...
     'time_window'   , [10 20]);
 
@@ -159,7 +160,7 @@ if pathname
     handles.pathname = pathname;
     matdata    = handles.data_array;
     MEPs       = handles.MEPs;
-    rat_name = get(handles.amp_gain, 'String');
+    rat_name = get(handles.rat_name, 'String');
     session_date = handles.session_date;
     STDP_condition = handles.STDP_condition;
     window = handles.params.time_window;
@@ -182,7 +183,7 @@ if strcmp(clear_data,'Yes')
     handles.pathname    = '';
     handles.filename    = '';
     handles.MEPs        = [];
-    set ([handles.amp_gain, handles.edit7, handles.edit8], 'String','');
+    set ([handles.amp_gain, handles.session_date, handles.STDP_condition], 'String','');
     handles.data_table.Data = [];
     handles.data_table.ColumnName = handles.data_table.ColumnName(1);
 else
@@ -200,9 +201,9 @@ function load_ws_button_Callback(hObject, eventdata, handles)
 for i = 1:length(handles.data_select)
     assignin('base',handles.data_array{handles.data_select(i),2},handles.data_array{handles.data_select(i),1});
 end
-assignin('base','rat_name',get(handles.amp_gain, 'String'));
-assignin('base','session_date',get(handles.edit7, 'String'));
-assignin('base','exp_condition',get(handles.edit8, 'String'));
+assignin('base','rat_name',get(handles.rat_name, 'String'));
+assignin('base','session_date',get(handles.session_date, 'String'));
+assignin('base','exp_condition',get(handles.STDP_condition, 'String'));
 end
 
 %CONV2ELF
@@ -443,7 +444,9 @@ handles.params.amp_gain = str2double(hObject.String);
 guidata(hObject, handles);
 end
 
+
 %RECTIFY
+
 function rectify_cbx_Callback(hObject, eventdata, handles)
 % hObject    handle to rectify_cbx (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -451,10 +454,11 @@ function rectify_cbx_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of rectify_cbx
 
-handles.params.rectify = get(hObject,'Value');
+    handles.params.rectify = get(hObject,'Value');
 % update handles in guidata
-guidata(hObject, handles);
+    guidata(hObject, handles);
 end
+
 
 
 function time_window_edit_Callback(hObject, eventdata, handles)
@@ -566,9 +570,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 end
 
-
-
-
 function rat_name_Callback(hObject, eventdata, handles)
 % hObject    handle to rat_name (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -590,3 +591,16 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
+
+
+% --- Executes on button press in dc.
+function dc_Callback(hObject, eventdata, handles)
+% hObject    handle to dc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    handles.dc = get(hObject, 'Value');
+    guidata(hObject, handles);
+% Hint: get(hObject,'Value') returns toggle state of dc
+end
+
+

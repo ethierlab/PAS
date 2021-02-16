@@ -36,7 +36,8 @@ function MEPs = calc_mean_MEPs(data_array,varargin)
 params = struct( ...
     'emg_vec'      ,[], ...
     'window'       ,[0 20],...
-    'amp_gain'     , 1);
+    'amp_gain'     , 1,...
+    'rectify'      ,false);
 
 params = parse_input_params(params,varargin);
 
@@ -82,14 +83,11 @@ for b = 1:num_blocks
       
 
 %        % rectify 
-%        tmp_emg = abs(tmp_emg);
+        tmp_emg = abs(tmp_emg);
 
         % rectify and filter EMG
-        tmp_emg = EMGs_rect_filt(tmp_emg',fs)';
+%        tmp_emg = EMGs_rect_filt(tmp_emg',fs)';
 
-        % rectify
-        tmp_emg = abs(tmp_emg);
-        
 %              %remove baseline
 %             tmp_emg = tmp_emg - mean(mean(tmp_emg(:,base_idx)));
 

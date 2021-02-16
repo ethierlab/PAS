@@ -34,7 +34,8 @@ params = struct(...
     'rectify'         ,'false', ...
     'plot'         , true,...
     'time_range'   ,[],...
-    'amp_gain'     ,1);
+    'amp_gain'     ,1,...
+    'dc'           , true);
 
 params = parse_input_params(params,varargin);
 
@@ -86,6 +87,11 @@ for b = 1:num_blocks
         %convert to uV
         tmp_emg = tmp_emg.*10^6/params.amp_gain;
         
+%         if params.dc
+%             mean_tmp_emg = mean(tmp_emg')';
+%             mean_tmp_emg = repmat(mean_tmp_emg,1,length(tmp_emg));
+%             tmp_emg = tmp_emg - mean_tmp_emg;
+%         end
         
         if params.rectify
 %             tmp_emg = abs(tmp_emg);
@@ -103,9 +109,6 @@ for b = 1:num_blocks
         if params.plot
             ah(e) = subplot(nEMGs,1,e);
             plotShadedSD(ah(e),timeframe,EMGm{b,e},EMGsd{b,e});
-            hold on;
-            % add envelope based on local maxima spline interpolation of N = 800 samples.  
-            plot(timeframe,envelope(EMGm{b,e},800,'peak'));
             xlabel('Time (s)');
             ylabel('Mean EMG (uV)');
             title(strrep(sprintf('Mean EMG Traces for Datablock %s',data_array{b,2}),'_','\_'));
